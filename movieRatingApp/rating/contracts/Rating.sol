@@ -10,6 +10,8 @@ contract Rating {
     mapping (bytes32 => uint8) private ratings;
     // This mapping keeps track of movie names to ensure no duplicates 
     mapping (bytes32 => bool) private movies;
+    // This mapping allows an account to only vote once
+    mapping (address => bool) private hasVoted;
   
     constructor(string[] memory _moviesList) {
         moviesList = _moviesList;
@@ -30,7 +32,12 @@ contract Rating {
 
     // Increments the vote count for the specified movie. Equivalent to upvoting. Hint: need to convert movieName from string to bytes32
     function voteForMovie(string memory movieName) public {
+
+        require(!(hasVoted[msg.sender] == true), "May only vote once per account");
+
         ratings[stringToBytes32(movieName)] += 1;
+
+        hasVoted[msg.sender] = true;
     }
   
     // Converts string to bytes32
@@ -43,5 +50,10 @@ contract Rating {
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function getMoviesList() public view returns (string[] memory _moviesList){
+        string [] memory _movieList = moviesList;
+        return _movieList;
     }
 }
